@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flood Ordinances</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f2744;--blue:#1a4a8a;--sky:#2563a8;--bg:#f4f6f9;--surface:#ffffff;--border:#dde3ed;--text:#1a2535;--muted:#64748b;--green:#0d9488;--green-bg:#f0fdf4;--green-border:#bbf7d0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Serif 4',Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 60%,var(--sky) 100%);padding:22px 40px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 24px rgba(15,39,68,0.18);}
+header .wave{font-size:24px;}
+header h1{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;}
+header p{font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;font-style:italic;}
+.back-btn{margin-left:auto;padding:7px 16px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:rgba(255,255,255,0.1);border-radius:20px;cursor:pointer;font-size:13px;font-family:'Source Serif 4',serif;text-decoration:none;transition:all 0.15s;}
+.back-btn:hover{background:rgba(255,255,255,0.25);}
+main{max-width:860px;margin:0 auto;padding:36px 24px;flex:1;width:100%;}
+.town-heading{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.town-meta{font-size:13px;color:var(--muted);margin-bottom:10px;font-style:italic;}
+.flood-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);font-size:13px;font-weight:600;padding:5px 14px;border-radius:20px;margin-bottom:24px;font-family:'JetBrains Mono',monospace;}
+.divider{height:1px;background:var(--border);margin-bottom:24px;}
+.section-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--sky);border-radius:10px;padding:22px 26px;margin-bottom:16px;transition:box-shadow 0.15s;}
+.section-card:hover{box-shadow:0 4px 16px rgba(15,39,68,0.08);}
+.sec-ref{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--sky);background:#eff6ff;padding:2px 8px;border-radius:4px;margin-bottom:8px;}
+.sec-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--navy);margin-bottom:10px;line-height:1.3;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.tag-chapter{font-size:11px;background:#f0f4ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:12px;padding:3px 10px;font-family:'JetBrains Mono',monospace;}
+.tag-page{font-size:11px;background:#f3f4f6;color:var(--muted);border:1px solid #e5e7eb;border-radius:12px;padding:3px 10px;font-family:'JetBrains Mono',monospace;}
+.reason{display:inline-block;font-size:12px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-border);border-radius:4px;padding:4px 10px;margin-top:4px;font-style:italic;}
+.expander{margin-top:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.expander-toggle{width:100%;background:#f8fafc;border:none;padding:10px 16px;text-align:left;cursor:pointer;font-family:'Source Serif 4',serif;font-size:13px;font-weight:600;color:var(--sky);display:flex;align-items:center;gap:8px;transition:background 0.1s;}
+.expander-toggle:hover{background:#eff6ff;}
+.expander-toggle .arrow{transition:transform 0.2s;font-size:10px;color:var(--muted);}
+.expander-toggle.open .arrow{transform:rotate(90deg);}
+.expander-body{display:none;padding:16px;background:#f9fafb;border-top:1px solid var(--border);}
+.expander-body.open{display:block;}
+.full-text{font-family:'Source Serif 4',serif;font-size:13px;line-height:1.9;color:#374151;white-space:pre-line;word-wrap:break-word;}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;gap:16px;color:var(--muted);}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--sky);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-msg{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:16px 20px;border-radius:8px;font-size:13px;font-family:'JetBrains Mono',monospace;}
+@media(max-width:600px){main{padding:20px 16px;}header{padding:16px 20px;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wave">🌊</div>
+  <div>
+    <h1 id="header-title">Flood Ordinances</h1>
+    <p id="header-sub">Loading...</p>
+  </div>
+  <a class="back-btn" href="index.html">Back to Search</a>
+</header>
+
+<main id="main-content">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p style="font-style:italic">Loading flood sections...</p>
+  </div>
+</main>
+
+<script>
+const GDRIVE_API_KEY   = "YOUR_API_KEY_HERE";
+const GDRIVE_FOLDER_ID = "YOUR_FOLDER_ID_HERE";
+const INDEX_FILE_ID    = "YOUR_INDEX_FILE_ID_HERE";
+
+let fileIdMap = {};
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const town   = params.get("town");
+  const county = params.get("county");
+
+  if (!town || !county) {
+    showError("No town specified. Please go back and select a town.");
+    return;
+  }
+
+  document.getElementById("header-title").textContent = town;
+  document.getElementById("header-sub").textContent   = county;
+  document.title = `${town} — Flood Ordinances`;
+
+  try {
+    await loadFileIds();
+    const filename = toFilename(town, county);
+    const fileId   = fileIdMap[filename];
+
+    if (!fileId) {
+      showError(`No ordinance file found for ${town}, ${county}.`);
+      return;
+    }
+
+    const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${GDRIVE_API_KEY}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    renderTown(data);
+  } catch(e) {
+    showError("Failed to load ordinances: " + e.message);
+  }
+}
+
+async function loadFileIds() {
+  let files = [], pageToken = null;
+  do {
+    let url = `https://www.googleapis.com/drive/v3/files?q=%27${GDRIVE_FOLDER_ID}%27+in+parents&fields=nextPageToken,files(id,name)&pageSize=1000&key=${GDRIVE_API_KEY}`;
+    if (pageToken) url += `&pageToken=${pageToken}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Drive API ${resp.status}`);
+    const data = await resp.json();
+    files = files.concat(data.files || []);
+    pageToken = data.nextPageToken || null;
+  } while(pageToken);
+  files.forEach(f => { fileIdMap[f.name] = f.id; });
+}
+
+function toFilename(town, county) {
+  const safe = s => s.replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
+  return `${safe(town)}_${safe(county)}.json`;
+}
+
+function renderTown(data) {
+  const sections = data.sections || [];
+  const flood    = sections
+    .filter(s => s.flood_related === true && !s.is_toc_entry)
+    .sort((a,b) => {
+      const am = (a.section_ref||"").match(/(\d+)-(\d+)/);
+      const bm = (b.section_ref||"").match(/(\d+)-(\d+)/);
+      if(!am||!bm) return 0;
+      return (parseInt(am[1])*10000+parseInt(am[2])) - (parseInt(bm[1])*10000+parseInt(bm[2]));
+    });
+
+  document.getElementById("header-sub").textContent =
+    `${data.county} · ${data.pdf_name||""} · ${data.total_pages||0} pages`;
+
+  const main = document.getElementById("main-content");
+
+  if (!flood.length) {
+    main.innerHTML = `
+      <h2 class="town-heading">${esc(data.town)}</h2>
+      <p class="town-meta">${esc(data.county)}</p>
+      <div style="text-align:center;padding:60px;color:var(--muted)">
+        <p style="font-size:16px">No flood-related sections found for this town.</p>
+      </div>`;
+    return;
+  }
+
+  let html = `
+    <h2 class="town-heading">${esc(data.town)}</h2>
+    <p class="town-meta">${esc(data.county)} · ${esc(data.pdf_name||"")} · ${data.total_pages||0} pages</p>
+    <div class="flood-badge">${flood.length} flood-related sections</div>
+    <div class="divider"></div>`;
+
+  flood.forEach((sec, idx) => {
+    const uid = `s${idx}`;
+    html += `
+    <div class="section-card">
+      <div><span class="sec-ref">${esc(sec.section_ref||"")}</span></div>
+      <div class="sec-title">${esc(sec.section_title||"")}</div>
+      <div class="tags">
+        <span class="tag-chapter">${esc(sec.chapter||"")}</span>
+        <span class="tag-page">pp. ${sec.page_start||"?"}–${sec.page_end||"?"}</span>
+      </div>
+      ${sec.classification_reason ? `<div class="reason">${esc(sec.classification_reason)}</div>` : ""}
+      <div class="expander">
+        <button class="expander-toggle" onclick="toggle('${uid}',this)">
+          <span class="arrow">&#9654;</span> Read full text
+        </button>
+        <div class="expander-body" id="${uid}">
+          <pre class="full-text">${esc(sec.full_text||"")}</pre>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  html += `<div style="height:32px"></div>
+    <p style="text-align:center;font-size:12px;color:var(--muted);font-style:italic">
+      ${flood.length} flood-related sections · ${esc(data.town)} · ${esc(data.county)}
+    </p><div style="height:32px"></div>`;
+
+  main.innerHTML = html;
+}
+
+function toggle(uid, btn) {
+  const body = document.getElementById(uid);
+  const open = body.classList.toggle("open");
+  btn.classList.toggle("open", open);
+}
+
+function showError(msg) {
+  document.getElementById("main-content").innerHTML =
+    `<div style="padding:40px"><div class="error-msg">${esc(msg)}</div></div>`;
+}
+
+function esc(s) {
+  return String(s||"")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

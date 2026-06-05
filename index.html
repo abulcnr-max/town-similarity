@@ -85,9 +85,9 @@ header p{font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px;font-style:it
         <span class="hint">2024-2025 estimate</span>
       </div>
       <div class="field">
-        <label>Land Area (sq miles)</label>
+        <label>Total Area (sq miles)</label>
         <input type="number" id="inp-area" placeholder="e.g. 27.0" min="0" step="0.01">
-        <span class="hint">Excludes water area</span>
+        
       </div>
       <div class="field">
         <label>Geography</label>
@@ -218,7 +218,7 @@ async function findSimilar() {
   const nearest  = knn(density, filtered, MAX_RESULTS + 5);
   const results  = nearest
     .filter(r => {
-      const sim = 1 / (1 + r.dist);
+      const sim = 1 / (1 + r.dist).toFixed(2);
       return sim >= SIMILARITY_THRESHOLD;
     })
     .slice(0, MAX_RESULTS);
